@@ -48,7 +48,7 @@
 <body>
 
     <div id="imageContainer">
-        <img id="https://lh3.googleusercontent.com/ci/AL18g_TeiDsHcn0dI7NQYtKBzPStFbYb-Vl_W_XRhNbCba9ksInHQ5gth1EuRP_-hu9TpjCumnDt9cg=s1200" alt="Test Image">
+        <img id="https://t3.ftcdn.net/jpg/05/66/02/98/240_F_566029808_X7praimuCQt0MsLCmw5d65Pp5KqmTS8e.jpg" alt="Test Image">
         <button id="fullscreenButton">Go Fullscreen</button>
     </div>
 
