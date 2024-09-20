@@ -1,112 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Simple Camera App with Fullscreen</title>
-    <style>
-        body {
-            margin: 0;
-            background-color: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
+var bool_isFullscreen = false;
+var myVideoGIF;
 
-        #cameraContainer {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #000;
-        }
+window.addEventListener('fullscreenchange', on_FS_Change, false);
 
-        #videoElement {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+function on_FS_Change(evt) {
+  if (document.fullscreenElement != null) {
+    bool_isFullscreen = true;
+  } else {
+    bool_isFullscreen = false;
+    exit_FullScreen();
+  }
+}
 
-        #fullscreenButton {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: none;
-            color: #000;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 5px;
-            z-index: 10;
-        }
-    </style>
-</head>
-<body>
+function go_FullScreen(input) {
+  myVideoGIF = document.getElementById(input.parentNode.id);
 
-    <div id="cameraContainer">
-        <video id="videoElement" autoplay playsinline></video> <!-- Camera preview -->
-        <button id="fullscreenButton">Go Fullscreen</button> <!-- Fullscreen button -->
-    </div>
+  if (bool_isFullscreen == true) {
+    exit_FullScreen();
+    return;
+  }
 
-    <script>
-        // References to elements
-        var videoElement = document.getElementById('videoElement');
-        var fullscreenButton = document.getElementById('fullscreenButton');
+  function openFullscreen(elem) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    } else if (elem.webkitEnterFullscreen) {
+      elem.webkitEnterFullscreen();
+    } else if (elem.children[0].webkitEnterFullscreen) {
+      elem.children[0].webkitEnterFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    }
+  }
 
-        // Start camera and display preview
-        function startCamera() {
-            var constraints = { video: { facingMode: "environment" }, audio: false };
+  openFullscreen(myVideoGIF);
 
-            navigator.mediaDevices.getUserMedia(constraints)
-            .then(function(stream) {
-                videoElement.srcObject = stream;
-                videoElement.play();
-            })
-            .catch(function(error) {
-                console.error("Error accessing camera:", error);
-                alert("Camera access denied.");
-            });
-        }
+  // Apply full screen styles to the video element
+  const video = myVideoGIF.children[0];
+  video.style.width = "100vw";  // 100% viewport width
+  video.style.height = "100vh"; // 100% viewport height
+  video.style.objectFit = "cover"; // ensures the video covers the screen proportionally
 
-        // Check if the device is iOS (Safari)
-        function isIOS() {
-            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        }
+  // Lock screen orientation to landscape if possible
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(function (error) {
+      console.error("Orientation lock failed: ", error);
+    });
+  }
 
-        // Enter fullscreen for iOS or regular browsers
-        function enterFullscreen() {
-            // If it's iOS Safari, use webkitEnterFullscreen on video element
-            if (isIOS()) {
-                if (videoElement.webkitEnterFullscreen) {
-                    videoElement.webkitEnterFullscreen(); // iOS-specific method
-                }
-            } else {
-                // For non-iOS browsers, request fullscreen on the container or video
-                var cameraContainer = document.getElementById('cameraContainer');
-                if (cameraContainer.requestFullscreen) {
-                    cameraContainer.requestFullscreen();
-                } else if (cameraContainer.mozRequestFullScreen) { // Firefox
-                    cameraContainer.mozRequestFullScreen();
-                } else if (cameraContainer.webkitRequestFullscreen) { // Chrome, Safari
-                    cameraContainer.webkitRequestFullscreen();
-                } else if (cameraContainer.msRequestFullscreen) { // IE/Edge
-                    cameraContainer.msRequestFullscreen();
-                }
-            }
-        }
+  bool_isFullscreen = true;
+}
 
-        // Add click/touch event for the button
-        fullscreenButton.addEventListener('click', enterFullscreen);
-        fullscreenButton.addEventListener('touchstart', enterFullscreen);
+function exit_FullScreen() {
+  if (bool_isFullscreen == true) {
+    bool_isFullscreen = false;
 
-        // Start camera when the page loads
-        window.addEventListener('load', startCamera);
-    </script>
-</body>
-</html>
+    if (document.exitFullscreen) {
+      document.exitFullscreen()
+        .then(() => console.log("Exited fullscreen mode"))
+        .catch((err) => console.error(err));
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+
+    // Restore video size to its default
+    const video = myVideoGIF.children[0];
+    video.style.width = "";  // Reset the style
+    video.style.height = "";
+    video.style.objectFit = "";
+
+    // Unlock screen orientation (back to the default)
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
+  }
+}
