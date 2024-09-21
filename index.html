@@ -29,10 +29,18 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            pointer-events: none; /* Disable interaction with the video */
-            -webkit-touch-callout: none; /* Disable touch callout */
-            -webkit-user-select: none;  /* Disable text selection */
-            -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
+        }
+
+        /* Invisible overlay to block touch interactions */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            z-index: 5; /* Ensure it covers the video */
+            pointer-events: none; /* Prevent interactions */
         }
 
         #fullscreenButton {
@@ -63,6 +71,7 @@
 
     <div id="cameraContainer">
         <video id="videoElement" autoplay playsinline muted></video> <!-- Camera preview -->
+        <div id="overlay"></div> <!-- Invisible overlay to block interaction -->
         <button id="fullscreenButton">Go Fullscreen</button> <!-- Fullscreen button -->
     </div>
 
@@ -71,12 +80,14 @@
         var videoElement = document.getElementById('videoElement');
         var fullscreenButton = document.getElementById('fullscreenButton');
         var cameraContainer = document.getElementById('cameraContainer');
+        var overlay = document.getElementById('overlay');
 
         // Function to adjust the height dynamically
         function adjustHeight() {
             var availableHeight = window.innerHeight;
             cameraContainer.style.height = availableHeight + 'px';
             videoElement.style.height = availableHeight + 'px';
+            overlay.style.height = availableHeight + 'px'; // Adjust overlay too
         }
 
         window.addEventListener('load', adjustHeight);
@@ -104,9 +115,6 @@
 
         // Enter fullscreen for iOS or regular browsers
         function enterFullscreen() {
-            // Disable controls explicitly before entering fullscreen
-            videoElement.controls = false;
-
             // If it's iOS Safari, use webkitEnterFullscreen on video element
             if (isIOS()) {
                 if (videoElement.webkitEnterFullscreen) {
