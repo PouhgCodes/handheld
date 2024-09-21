@@ -50,6 +50,27 @@
             z-index: 10;
         }
 
+        /* Hide iOS video controls */
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+
+        /* Hiding the default play button in iOS */
+        video::-webkit-media-controls-start-playback-button {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            -webkit-appearance: none !important;
+        }
+
+        /* Hide entire controls panel */
+        video::-webkit-media-controls-panel {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            -webkit-appearance: none !important;
+        }
+
         /* Media query for smaller screens */
         @media (max-width: 600px) {
             #fullscreenButton {
