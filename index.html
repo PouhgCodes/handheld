@@ -28,7 +28,7 @@
         #videoElement {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover; /* Zoom to fit */
             pointer-events: none; /* Disable interaction with the video */
             -webkit-touch-callout: none; /* Disable touch callout */
             -webkit-user-select: none;  /* Disable text selection */
@@ -102,11 +102,16 @@
         // Handle fullscreen changes to resume the camera after exiting fullscreen
         document.addEventListener('fullscreenchange', function() {
             if (!document.fullscreenElement) {
-                // When exiting fullscreen, force the video to play again
+                // When exiting fullscreen, resume the video if it froze
                 if (stream) {
                     videoElement.srcObject = stream;
                     videoElement.play();
                 }
+                // Revert zoom mode after exiting fullscreen
+                videoElement.style.objectFit = 'cover'; // Ensures it's still full width/height after exiting
+            } else {
+                // Apply 'Zoom to Fit' mode when entering fullscreen
+                videoElement.style.objectFit = 'cover'; // Ensures it fills the screen in fullscreen
             }
         });
 
@@ -121,6 +126,7 @@
             if (isIOS()) {
                 if (videoElement.webkitEnterFullscreen) {
                     videoElement.webkitEnterFullscreen(); // iOS-specific method
+                    videoElement.style.objectFit = 'cover'; // Make sure it zooms to fit in fullscreen
                 }
             } else {
                 // For non-iOS browsers, request fullscreen on the container
@@ -133,6 +139,8 @@
                 } else if (cameraContainer.msRequestFullscreen) { // IE/Edge
                     cameraContainer.msRequestFullscreen();
                 }
+                // Apply zoom-to-fit when entering fullscreen
+                videoElement.style.objectFit = 'cover';
             }
         }
 
