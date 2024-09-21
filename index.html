@@ -8,29 +8,26 @@
         body {
             margin: 0;
             padding: 0;
+            background-color: black;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            background-color: black;
         }
 
         #cameraContainer {
             position: relative;
             width: 100vw;
-            height: 100vh;
+            height: 100%; /* Set initially to 100%, then dynamically adjust via JS */
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: #000;
-            overflow: hidden; /* Prevents overflow from exceeding viewport size */
         }
 
         #videoElement {
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
 
@@ -49,7 +46,7 @@
             z-index: 10;
         }
 
-        /* Ensure the button is smaller on small screens */
+        /* Media query for smaller screens */
         @media (max-width: 600px) {
             #fullscreenButton {
                 font-size: 16px;
@@ -69,6 +66,21 @@
         // References to elements
         var videoElement = document.getElementById('videoElement');
         var fullscreenButton = document.getElementById('fullscreenButton');
+        var cameraContainer = document.getElementById('cameraContainer');
+
+        // Function to adjust the height dynamically
+        function adjustHeight() {
+            // Get the available height minus UI elements
+            var availableHeight = window.innerHeight;
+
+            // Apply the available height to the container and video element
+            cameraContainer.style.height = availableHeight + 'px';
+            videoElement.style.height = availableHeight + 'px';
+        }
+
+        // Call the adjustHeight function on load and when the window resizes
+        window.addEventListener('load', adjustHeight);
+        window.addEventListener('resize', adjustHeight);
 
         // Start camera and display preview
         function startCamera() {
@@ -99,7 +111,6 @@
                 }
             } else {
                 // For non-iOS browsers, request fullscreen on the container or video
-                var cameraContainer = document.getElementById('cameraContainer');
                 if (cameraContainer.requestFullscreen) {
                     cameraContainer.requestFullscreen();
                 } else if (cameraContainer.mozRequestFullScreen) { // Firefox
