@@ -18,7 +18,7 @@
         #cameraContainer {
             position: relative;
             width: 100vw;
-            height: 100%; /* Set initially to 100%, then dynamically adjust via JS */
+            height: 100%; /* Dynamically adjust via JS */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -29,6 +29,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            -webkit-touch-callout: none; /* Disable touch callout */
+            -webkit-user-select: none;  /* Disable text selection on long press */
+            -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
+            pointer-events: none; /* Disable interaction with the video */
         }
 
         #fullscreenButton {
@@ -58,7 +62,7 @@
 <body>
 
     <div id="cameraContainer">
-        <video id="videoElement" autoplay playsinline></video> <!-- Camera preview -->
+        <video id="videoElement" autoplay playsinline muted></video> <!-- Camera preview -->
         <button id="fullscreenButton">Go Fullscreen</button> <!-- Fullscreen button -->
     </div>
 
@@ -70,15 +74,11 @@
 
         // Function to adjust the height dynamically
         function adjustHeight() {
-            // Get the available height minus UI elements
             var availableHeight = window.innerHeight;
-
-            // Apply the available height to the container and video element
             cameraContainer.style.height = availableHeight + 'px';
             videoElement.style.height = availableHeight + 'px';
         }
 
-        // Call the adjustHeight function on load and when the window resizes
         window.addEventListener('load', adjustHeight);
         window.addEventListener('resize', adjustHeight);
 
@@ -107,10 +107,12 @@
             // If it's iOS Safari, use webkitEnterFullscreen on video element
             if (isIOS()) {
                 if (videoElement.webkitEnterFullscreen) {
+                    videoElement.controls = false; // Ensure controls are disabled
                     videoElement.webkitEnterFullscreen(); // iOS-specific method
                 }
             } else {
                 // For non-iOS browsers, request fullscreen on the container or video
+                videoElement.controls = false; // Disable controls
                 if (cameraContainer.requestFullscreen) {
                     cameraContainer.requestFullscreen();
                 } else if (cameraContainer.mozRequestFullScreen) { // Firefox
