@@ -7,12 +7,14 @@
     <style>
         body {
             margin: 0;
-            background-color: black;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
+            background-color: black;
         }
 
         #cameraContainer {
@@ -23,11 +25,12 @@
             justify-content: center;
             align-items: center;
             background-color: #000;
+            overflow: hidden; /* Prevents overflow from exceeding viewport size */
         }
 
         #videoElement {
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             object-fit: cover;
         }
 
@@ -44,6 +47,14 @@
             cursor: pointer;
             border-radius: 5px;
             z-index: 10;
+        }
+
+        /* Ensure the button is smaller on small screens */
+        @media (max-width: 600px) {
+            #fullscreenButton {
+                font-size: 16px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
