@@ -18,7 +18,7 @@
         #cameraContainer {
             position: relative;
             width: 100vw;
-            height: 100%; /* Dynamically adjust via JS */
+            height: 100vh; /* Dynamically adjust via JS */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,7 +28,7 @@
         #videoElement {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Zoom to fit */
+            object-fit: contain; /* Default mode: contain */
             pointer-events: none; /* Disable interaction with the video */
             -webkit-touch-callout: none; /* Disable touch callout */
             -webkit-user-select: none;  /* Disable text selection */
@@ -99,19 +99,18 @@
             });
         }
 
-        // Handle fullscreen changes to resume the camera after exiting fullscreen
+        // Handle fullscreen changes to adjust the "Zoom to Fit" and resume playback
         document.addEventListener('fullscreenchange', function() {
             if (!document.fullscreenElement) {
                 // When exiting fullscreen, resume the video if it froze
                 if (stream) {
                     videoElement.srcObject = stream;
-                    videoElement.play();
+                    videoElement.play();  // Ensure video is playing after exiting fullscreen
                 }
-                // Revert zoom mode after exiting fullscreen
-                videoElement.style.objectFit = 'cover'; // Ensures it's still full width/height after exiting
+                videoElement.style.objectFit = 'contain'; // Reset to "contain" after exiting fullscreen
             } else {
-                // Apply 'Zoom to Fit' mode when entering fullscreen
-                videoElement.style.objectFit = 'cover'; // Ensures it fills the screen in fullscreen
+                // Apply "Zoom to Fit" mode when entering fullscreen
+                videoElement.style.objectFit = 'cover';  // "Zoom to fit" when in fullscreen
             }
         });
 
