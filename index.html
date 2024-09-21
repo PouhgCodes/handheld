@@ -29,10 +29,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            -webkit-touch-callout: none; /* Disable touch callout */
-            -webkit-user-select: none;  /* Disable text selection on long press */
-            -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
             pointer-events: none; /* Disable interaction with the video */
+            -webkit-touch-callout: none; /* Disable touch callout */
+            -webkit-user-select: none;  /* Disable text selection */
+            -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
         }
 
         #fullscreenButton {
@@ -104,15 +104,16 @@
 
         // Enter fullscreen for iOS or regular browsers
         function enterFullscreen() {
+            // Disable controls explicitly before entering fullscreen
+            videoElement.controls = false;
+
             // If it's iOS Safari, use webkitEnterFullscreen on video element
             if (isIOS()) {
                 if (videoElement.webkitEnterFullscreen) {
-                    videoElement.controls = false; // Ensure controls are disabled
                     videoElement.webkitEnterFullscreen(); // iOS-specific method
                 }
             } else {
-                // For non-iOS browsers, request fullscreen on the container or video
-                videoElement.controls = false; // Disable controls
+                // For non-iOS browsers, request fullscreen on the container
                 if (cameraContainer.requestFullscreen) {
                     cameraContainer.requestFullscreen();
                 } else if (cameraContainer.mozRequestFullScreen) { // Firefox
