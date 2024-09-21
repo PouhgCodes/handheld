@@ -18,7 +18,7 @@
         #cameraContainer {
             position: relative;
             width: 100vw;
-            height: 100vh; /* Ensures it fills the viewport */
+            height: 100vh; /* Fills the entire viewport */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,7 +28,7 @@
         #videoElement {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Default mode: contain */
+            object-fit: contain; /* Default: make the video fit within the container */
             pointer-events: none; /* Disable interaction with the video */
             -webkit-touch-callout: none; /* Disable touch callout */
             -webkit-user-select: none;  /* Disable text selection */
@@ -67,7 +67,6 @@
     </div>
 
     <script>
-        // References to elements
         var videoElement = document.getElementById('videoElement');
         var fullscreenButton = document.getElementById('fullscreenButton');
         var cameraContainer = document.getElementById('cameraContainer');
@@ -89,10 +88,10 @@
             });
         }
 
-        // Handle fullscreen changes to adjust the video and resume playback
+        // Handle fullscreen changes to resume video playback when exiting fullscreen
         document.addEventListener('fullscreenchange', function() {
             if (!document.fullscreenElement) {
-                // When exiting fullscreen, resume the video if needed
+                // Ensure the video resumes after exiting fullscreen
                 if (videoElement.paused && stream) {
                     videoElement.srcObject = stream;
                     videoElement.play();  // Resume playback after exiting fullscreen
@@ -107,7 +106,6 @@
 
         // Enter fullscreen for iOS or regular browsers
         function enterFullscreen() {
-            // iOS Safari requires webkitEnterFullscreen on the video element itself
             if (isIOS()) {
                 if (videoElement.webkitEnterFullscreen) {
                     videoElement.webkitEnterFullscreen(); // iOS-specific method
@@ -130,7 +128,7 @@
         fullscreenButton.addEventListener('click', enterFullscreen);
         fullscreenButton.addEventListener('touchstart', enterFullscreen);
 
-        // Start camera when the page loads
+        // Start the camera when the page loads
         window.addEventListener('load', startCamera);
     </script>
 </body>
