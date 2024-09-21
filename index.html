@@ -71,7 +71,6 @@
         var fullscreenButton = document.getElementById('fullscreenButton');
         var cameraContainer = document.getElementById('cameraContainer');
         var stream;
-        var permissionGranted = false; // Track whether permission is granted
 
         // Function to dynamically adjust the container height (fix button behind URL bar)
         function adjustHeight() {
@@ -83,40 +82,34 @@
         window.addEventListener('load', adjustHeight); // Call when page loads
         window.addEventListener('resize', adjustHeight); // Call when window resizes
 
-        // Start camera and display preview (only if permission is already granted or user has given it)
+        // Start the camera and keep the stream running in the background
         function startCamera() {
             var constraints = { video: { facingMode: "environment" }, audio: false };
 
-            if (!permissionGranted) {
-                navigator.mediaDevices.getUserMedia(constraints)
-                .then(function(mediaStream) {
-                    stream = mediaStream;
-                    videoElement.srcObject = stream;
-                    videoElement.play();
-                    permissionGranted = true; // Permission has been granted, save this state
-                })
-                .catch(function(error) {
-                    console.error("Error accessing camera:", error);
-                    alert("Camera access denied.");
-                });
-            } else {
-                videoElement.srcObject = stream; // Reconnect the existing stream
-                videoElement.play(); // Continue playing if permission is granted
-            }
+            navigator.mediaDevices.getUserMedia(constraints)
+            .then(function(mediaStream) {
+                stream = mediaStream;
+                videoElement.srcObject = stream;
+                videoElement.play();
+            })
+            .catch(function(error) {
+                console.error("Error accessing camera:", error);
+                alert("Camera access denied.");
+            });
         }
 
-        // Refresh the video stream when exiting fullscreen
-        function refreshVideoStream() {
-            if (permissionGranted && stream) {
+        // Keep the stream alive in the background when exiting fullscreen
+        function keepStreamAlive() {
+            if (stream) {
                 videoElement.srcObject = stream;
-                videoElement.play(); // Resume playback
+                videoElement.play();  // Force video to play and keep stream alive
             }
         }
 
         // Handle fullscreen changes and refresh the video stream when exiting fullscreen
         document.addEventListener('fullscreenchange', function() {
             if (!document.fullscreenElement) {
-                refreshVideoStream(); // Refresh video stream after exiting fullscreen
+                keepStreamAlive(); // Keep the stream running after exiting fullscreen
             }
         });
 
