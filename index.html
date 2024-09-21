@@ -110,17 +110,29 @@
             }
         });
 
-        // Enter fullscreen for regular browsers (apply fullscreen to container)
+        // Detect if the device is iOS (Safari)
+        function isIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
+        // Enter fullscreen for iOS or regular browsers
         function enterFullscreen() {
-            // For all browsers, request fullscreen on the container, not the video element
-            if (cameraContainer.requestFullscreen) {
-                cameraContainer.requestFullscreen();
-            } else if (cameraContainer.mozRequestFullScreen) { // Firefox
-                cameraContainer.mozRequestFullScreen();
-            } else if (cameraContainer.webkitRequestFullscreen) { // Chrome, Safari
-                cameraContainer.webkitRequestFullscreen();
-            } else if (cameraContainer.msRequestFullscreen) { // IE/Edge
-                cameraContainer.msRequestFullscreen();
+            // iOS Safari requires webkitEnterFullscreen on the video element itself
+            if (isIOS()) {
+                if (videoElement.webkitEnterFullscreen) {
+                    videoElement.webkitEnterFullscreen(); // iOS-specific method
+                }
+            } else {
+                // For non-iOS browsers, request fullscreen on the container
+                if (cameraContainer.requestFullscreen) {
+                    cameraContainer.requestFullscreen();
+                } else if (cameraContainer.mozRequestFullScreen) { // Firefox
+                    cameraContainer.mozRequestFullScreen();
+                } else if (cameraContainer.webkitRequestFullscreen) { // Chrome, Safari
+                    cameraContainer.webkitRequestFullscreen();
+                } else if (cameraContainer.msRequestFullscreen) { // IE/Edge
+                    cameraContainer.msRequestFullscreen();
+                }
             }
         }
 
