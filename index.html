@@ -98,16 +98,22 @@
             });
         }
 
-        // Handle fullscreen changes to resume video playback when exiting fullscreen
+        // Handle fullscreen changes and force resume of the video when exiting fullscreen
         document.addEventListener('fullscreenchange', function() {
             if (!document.fullscreenElement) {
-                // Ensure the video resumes after exiting fullscreen
-                if (videoElement.paused && stream) {
-                    videoElement.srcObject = stream;
-                    videoElement.play();  // Resume playback after exiting fullscreen
+                // Exit fullscreen: Force resume the video
+                if (stream) {
+                    videoElement.srcObject = stream;  // Reassign the stream to ensure it remains connected
+                    videoElement.play();  // Force video to play when exiting fullscreen
                 }
             }
         });
+
+        // Prevent iOS from pausing the video automatically in fullscreen by forcing playback
+        function handleIOSFullscreen() {
+            videoElement.srcObject = stream;  // Ensure the stream stays connected
+            videoElement.play();  // Force the video to play again
+        }
 
         // Detect if the device is iOS (Safari)
         function isIOS() {
@@ -119,6 +125,7 @@
             if (isIOS()) {
                 if (videoElement.webkitEnterFullscreen) {
                     videoElement.webkitEnterFullscreen(); // iOS-specific method
+                    handleIOSFullscreen();  // Ensure video plays on iOS when entering fullscreen
                 }
             } else {
                 // For non-iOS browsers, request fullscreen on the container
