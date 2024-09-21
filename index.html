@@ -71,6 +71,7 @@
         var fullscreenButton = document.getElementById('fullscreenButton');
         var cameraContainer = document.getElementById('cameraContainer');
         var stream;
+        var isFullscreen = false;  // Track fullscreen state
 
         // Function to dynamically adjust the container height (fix button behind URL bar)
         function adjustHeight() {
@@ -82,7 +83,7 @@
         window.addEventListener('load', adjustHeight); // Call when page loads
         window.addEventListener('resize', adjustHeight); // Call when window resizes
 
-        // Start the camera and keep the stream running in the background
+        // Start the camera and keep the stream running
         function startCamera() {
             var constraints = { video: { facingMode: "environment" }, audio: false };
 
@@ -98,18 +99,25 @@
             });
         }
 
-        // Keep the stream alive in the background when exiting fullscreen
-        function keepStreamAlive() {
-            if (stream) {
-                videoElement.srcObject = stream;
-                videoElement.play();  // Force video to play and keep stream alive
-            }
+        // Function to check if the screen is in fullscreen and force playback if not
+        function monitorFullscreen() {
+            setInterval(function() {
+                if (!document.fullscreenElement && isFullscreen) {
+                    console.log("Exited fullscreen, resuming video...");
+                    setTimeout(function() {
+                        videoElement.play();  // Resume video after buffering delay
+                    }, 500);  // 500ms delay to simulate buffering
+                    isFullscreen = false;  // Update fullscreen state
+                }
+            }, 100);  // Check every 100ms
         }
 
-        // Handle fullscreen changes and refresh the video stream when exiting fullscreen
+        // Detect fullscreen changes and update state
         document.addEventListener('fullscreenchange', function() {
-            if (!document.fullscreenElement) {
-                keepStreamAlive(); // Keep the stream running after exiting fullscreen
+            if (document.fullscreenElement) {
+                isFullscreen = true;  // Fullscreen active
+            } else {
+                isFullscreen = false;  // Fullscreen exited
             }
         });
 
@@ -149,8 +157,11 @@
         fullscreenButton.addEventListener('click', enterFullscreen);
         fullscreenButton.addEventListener('touchstart', enterFullscreen);
 
-        // Start the camera when the page loads
-        window.addEventListener('load', startCamera);
+        // Start the camera and monitor fullscreen mode when the page loads
+        window.addEventListener('load', function() {
+            startCamera();
+            monitorFullscreen();  // Continuously monitor fullscreen status
+        });
     </script>
 </body>
 </html>
