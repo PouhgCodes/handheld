@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Camera Preview with Scroll Trick</title>
+    <title>Camera Preview with Scroll Instruction</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
             background-color: #000;
         }
 
-        /* Transparent canvas for scroll */
+        /* Transparent canvas for scrolling */
         .scrollable-canvas {
             width: 100vw;
             height: 200vh; /* Large enough for scrolling */
@@ -41,25 +41,17 @@
             filter: invert(100%) grayscale(100%);
         }
 
-        .controls {
+        /* Text instruction for scrolling */
+        .scroll-instruction {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 20; /* Higher than both canvas and video */
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #ddd;
+            z-index: 20;
+            font-family: 'Times New Roman', serif;
+            font-size: 14pt;
+            color: #330000;
+            background: none;
         }
     </style>
 </head>
@@ -70,14 +62,13 @@
     <!-- Fixed video feed -->
     <video id="cameraStream" class="video-feed" autoplay playsinline></video>
 
-    <!-- Button to trigger scroll -->
-    <div class="controls">
-        <button id="scrollBtn">Temp</button>
+    <!-- Scroll instruction -->
+    <div class="scroll-instruction">
+        Scroll to enter/exit fullscreen
     </div>
 
     <script>
         const video = document.getElementById('cameraStream');
-        const scrollBtn = document.getElementById('scrollBtn');
 
         // Start the back-facing camera with filters
         async function startCamera() {
@@ -93,16 +84,8 @@
             }
         }
 
-        // Start camera feed on page load
+        // Start the camera feed when the page loads
         startCamera();
-
-        // Button triggers scroll to hide the URL bar
-        scrollBtn.addEventListener('click', () => {
-            // Ensure scroll happens as part of user interaction
-            setTimeout(() => {
-                window.scrollTo(0, 1); // Scroll slightly to collapse URL bar
-            }, 50); // Short delay to trigger proper scroll event
-        });
 
         // Adjust video to ensure it fits full screen
         function adjustVideoFit() {
