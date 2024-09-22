@@ -15,19 +15,21 @@
 
         body, html {
             width: 100%;
-            height: 200vh; /* Double the screen height for scrolling */
+            height: 200vh; /* Large enough for scrolling */
             overflow-x: hidden;
             background-color: #000;
         }
 
-        /* Scrollable canvas to create enough scroll space */
+        /* Transparent canvas for scroll */
         .scrollable-canvas {
             width: 100vw;
-            height: 200vh; /* Double height to allow scroll */
-            background-color: #111;
+            height: 200vh; /* Large enough for scrolling */
+            background-color: transparent; /* Make the canvas invisible */
+            position: relative;
+            z-index: 1;
         }
 
-        /* Video is fixed to the screen top, covers entire screen */
+        /* Video feed stays fixed and full-screen */
         .video-feed {
             position: fixed;
             top: 0;
@@ -35,7 +37,7 @@
             width: 100vw;
             height: 100vh;
             object-fit: cover;
-            z-index: 10;
+            z-index: 10; /* Higher than canvas */
             filter: invert(100%) grayscale(100%);
         }
 
@@ -44,7 +46,7 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 20;
+            z-index: 20; /* Higher than both canvas and video */
         }
 
         button {
@@ -62,10 +64,10 @@
     </style>
 </head>
 <body>
-    <!-- Canvas just for scrolling -->
+    <!-- Transparent canvas for scrolling -->
     <div class="scrollable-canvas"></div>
 
-    <!-- Video feed fixed to the screen -->
+    <!-- Fixed video feed -->
     <video id="cameraStream" class="video-feed" autoplay playsinline></video>
 
     <!-- Button to trigger scroll -->
@@ -77,12 +79,12 @@
         const video = document.getElementById('cameraStream');
         const scrollBtn = document.getElementById('scrollBtn');
 
-        // Start the back-facing camera
+        // Start the back-facing camera with filters
         async function startCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: { exact: "environment" } // Back camera
+                        facingMode: { exact: "environment" } // Use back camera
                     }
                 });
                 video.srcObject = stream;
@@ -91,24 +93,24 @@
             }
         }
 
-        // Start the camera when the page loads
+        // Start camera feed on page load
         startCamera();
 
-        // Scroll the page to hide the URL bar when button is pressed
+        // Button triggers scroll to hide the URL bar
         scrollBtn.addEventListener('click', () => {
             // Ensure scroll happens as part of user interaction
             setTimeout(() => {
-                window.scrollTo(0, 1); // Scroll down 1px to hide URL bar
-            }, 50); // Delay slightly to ensure scroll trigger
+                window.scrollTo(0, 1); // Scroll slightly to collapse URL bar
+            }, 50); // Short delay to trigger proper scroll event
         });
 
-        // Ensure video covers full screen
+        // Adjust video to ensure it fits full screen
         function adjustVideoFit() {
             video.style.width = '100vw';
             video.style.height = '100vh';
         }
 
-        // Adjust video on window resize or orientation change
+        // Re-adjust video size on window resize or orientation change
         window.addEventListener('resize', adjustVideoFit);
     </script>
 </body>
