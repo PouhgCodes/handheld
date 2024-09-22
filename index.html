@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Camera Preview with Filters and Scroll Trick</title>
+    <title>Camera Preview with Scroll Trick</title>
     <style>
         * {
             margin: 0;
@@ -15,19 +15,19 @@
 
         body, html {
             width: 100%;
-            height: 200vh; /* Makes the canvas taller to enable scrolling */
+            height: 200vh; /* Double the screen height for scrolling */
             overflow-x: hidden;
             background-color: #000;
         }
 
-        /* This canvas is just for creating a scrollable area */
+        /* Scrollable canvas to create enough scroll space */
         .scrollable-canvas {
             width: 100vw;
-            height: 200vh; /* Large enough to trigger the scroll */
-            background-color: #111; /* Just to distinguish it's here */
+            height: 200vh; /* Double height to allow scroll */
+            background-color: #111;
         }
 
-        /* Video feed is fixed to the top and covers the entire screen */
+        /* Video is fixed to the screen top, covers entire screen */
         .video-feed {
             position: fixed;
             top: 0;
@@ -35,8 +35,8 @@
             width: 100vw;
             height: 100vh;
             object-fit: cover;
-            z-index: 10; /* Keeps it above the canvas */
-            filter: invert(100%) grayscale(100%); /* Applying filters */
+            z-index: 10;
+            filter: invert(100%) grayscale(100%);
         }
 
         .controls {
@@ -62,13 +62,13 @@
     </style>
 </head>
 <body>
-    <!-- Canvas to create scrollable space -->
+    <!-- Canvas just for scrolling -->
     <div class="scrollable-canvas"></div>
 
-    <!-- Video feed, which is fixed to simulate fullscreen -->
+    <!-- Video feed fixed to the screen -->
     <video id="cameraStream" class="video-feed" autoplay playsinline></video>
 
-    <!-- Control button to trigger the scroll event -->
+    <!-- Button to trigger scroll -->
     <div class="controls">
         <button id="scrollBtn">Temp</button>
     </div>
@@ -77,12 +77,12 @@
         const video = document.getElementById('cameraStream');
         const scrollBtn = document.getElementById('scrollBtn');
 
-        // Start the back-facing camera with filters applied
+        // Start the back-facing camera
         async function startCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: { exact: "environment" } // Use the back camera
+                        facingMode: { exact: "environment" } // Back camera
                     }
                 });
                 video.srcObject = stream;
@@ -91,24 +91,24 @@
             }
         }
 
-        // Start the camera stream when the page loads
+        // Start the camera when the page loads
         startCamera();
 
-        // Scroll the page slightly to hide the URL bar when the button is clicked
+        // Scroll the page to hide the URL bar when button is pressed
         scrollBtn.addEventListener('click', () => {
-            window.scrollTo(0, 1); // Scroll down 1px to collapse the URL bar
+            // Ensure scroll happens as part of user interaction
+            setTimeout(() => {
+                window.scrollTo(0, 1); // Scroll down 1px to hide URL bar
+            }, 50); // Delay slightly to ensure scroll trigger
         });
 
-        // Ensure the video feed covers the screen without any black bars
+        // Ensure video covers full screen
         function adjustVideoFit() {
             video.style.width = '100vw';
             video.style.height = '100vh';
         }
 
-        // Initial adjustment of video size
-        adjustVideoFit();
-
-        // Re-adjust video size on window resize or orientation change
+        // Adjust video on window resize or orientation change
         window.addEventListener('resize', adjustVideoFit);
     </script>
 </body>
