@@ -2,166 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Simple Camera App with Fullscreen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Camera Preview with Filters and Scroll Trick</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background-color: black;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-sizing: border-box;
         }
 
-        #cameraContainer {
-            position: relative;
-            width: 100vw;
-            height: 100vh; /* Dynamically adjust via JS */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        body, html {
+            width: 100%;
+            height: 200vh; /* Makes the canvas taller to enable scrolling */
+            overflow-x: hidden;
             background-color: #000;
         }
 
-        #videoElement {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Ensures the video covers the entire container */
-            pointer-events: none; /* Disable interaction with the video */
-            -webkit-touch-callout: none; /* Disable touch callout */
-            -webkit-user-select: none;  /* Disable text selection */
-            -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
+        /* This canvas is just for creating a scrollable area */
+        .scrollable-canvas {
+            width: 100vw;
+            height: 200vh; /* Large enough to trigger the scroll */
+            background-color: #111; /* Just to distinguish it's here */
         }
 
-        #fullscreenButton {
-            position: absolute;
+        /* Video feed is fixed to the top and covers the entire screen */
+        .video-feed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 10; /* Keeps it above the canvas */
+            filter: invert(100%) grayscale(100%); /* Applying filters */
+        }
+
+        .controls {
+            position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 10px 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: none;
-            color: #000;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 5px;
-            z-index: 10;
+            z-index: 20;
         }
 
-        /* Media query for smaller screens */
-        @media (max-width: 600px) {
-            #fullscreenButton {
-                font-size: 16px;
-                padding: 8px 16px;
-            }
+        button {
+            padding: 10px 20px;
+            background-color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #ddd;
         }
     </style>
 </head>
 <body>
+    <!-- Canvas to create scrollable space -->
+    <div class="scrollable-canvas"></div>
 
-    <div id="cameraContainer">
-        <video id="videoElement" autoplay playsinline muted></video> <!-- Camera preview -->
-        <button id="fullscreenButton">Go Fullscreen</button> <!-- Fullscreen button -->
+    <!-- Video feed, which is fixed to simulate fullscreen -->
+    <video id="cameraStream" class="video-feed" autoplay playsinline></video>
+
+    <!-- Control button to trigger the scroll event -->
+    <div class="controls">
+        <button id="scrollBtn">Temp</button>
     </div>
 
     <script>
-        var videoElement = document.getElementById('videoElement');
-        var fullscreenButton = document.getElementById('fullscreenButton');
-        var cameraContainer = document.getElementById('cameraContainer');
-        var stream;
-        var isFullscreen = false;  // Track fullscreen state
+        const video = document.getElementById('cameraStream');
+        const scrollBtn = document.getElementById('scrollBtn');
 
-        // Function to dynamically adjust the container height (fix button behind URL bar)
-        function adjustHeight() {
-            var availableHeight = window.innerHeight; // Calculate available height, accounting for mobile UI
-            cameraContainer.style.height = availableHeight + 'px'; // Ensure container takes up full screen
-            videoElement.style.height = availableHeight + 'px'; // Ensure video takes up full height
-        }
-
-        window.addEventListener('load', adjustHeight); // Call when page loads
-        window.addEventListener('resize', adjustHeight); // Call when window resizes
-
-        // Start the camera and keep the stream running
-        function startCamera() {
-            var constraints = { video: { facingMode: "environment" }, audio: false };
-
-            navigator.mediaDevices.getUserMedia(constraints)
-            .then(function(mediaStream) {
-                stream = mediaStream;
-                videoElement.srcObject = stream;
-                videoElement.play();
-            })
-            .catch(function(error) {
-                console.error("Error accessing camera:", error);
-                alert("Camera access denied.");
-            });
-        }
-
-        // Function to check if the screen is in fullscreen and force playback if not
-        function monitorFullscreen() {
-            setInterval(function() {
-                if (!document.fullscreenElement && isFullscreen) {
-                    console.log("Exited fullscreen, resuming video...");
-                    setTimeout(function() {
-                        videoElement.play();  // Resume video after buffering delay
-                    }, 500);  // 500ms delay to simulate buffering
-                    isFullscreen = false;  // Update fullscreen state
-                }
-            }, 100);  // Check every 100ms
-        }
-
-        // Detect fullscreen changes and update state
-        document.addEventListener('fullscreenchange', function() {
-            if (document.fullscreenElement) {
-                isFullscreen = true;  // Fullscreen active
-            } else {
-                isFullscreen = false;  // Fullscreen exited
-            }
-        });
-
-        // Prevent iOS from pausing the video automatically in fullscreen by forcing playback
-        function handleIOSFullscreen() {
-            videoElement.srcObject = stream;  // Ensure the stream stays connected
-            videoElement.play();  // Force the video to play again
-        }
-
-        // Detect if the device is iOS (Safari)
-        function isIOS() {
-            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        }
-
-        // Enter fullscreen for iOS or regular browsers
-        function enterFullscreen() {
-            if (isIOS()) {
-                if (videoElement.webkitEnterFullscreen) {
-                    videoElement.webkitEnterFullscreen(); // iOS-specific method
-                    videoElement.addEventListener('webkitbeginfullscreen', handleIOSFullscreen); // Play video on entering fullscreen
-                }
-            } else {
-                // For non-iOS browsers, request fullscreen on the container
-                if (cameraContainer.requestFullscreen) {
-                    cameraContainer.requestFullscreen();
-                } else if (cameraContainer.mozRequestFullScreen) { // Firefox
-                    cameraContainer.mozRequestFullScreen();
-                } else if (cameraContainer.webkitRequestFullscreen) { // Chrome, Safari
-                    cameraContainer.webkitRequestFullscreen();
-                } else if (cameraContainer.msRequestFullscreen) { // IE/Edge
-                    cameraContainer.msRequestFullscreen();
-                }
+        // Start the back-facing camera with filters applied
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { exact: "environment" } // Use the back camera
+                    }
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Error accessing the camera: ", err);
             }
         }
 
-        // Add click/touch event for the button
-        fullscreenButton.addEventListener('click', enterFullscreen);
-        fullscreenButton.addEventListener('touchstart', enterFullscreen);
+        // Start the camera stream when the page loads
+        startCamera();
 
-        // Start the camera and monitor fullscreen mode when the page loads
-        window.addEventListener('load', function() {
-            startCamera();
-            monitorFullscreen();  // Continuously monitor fullscreen status
+        // Scroll the page slightly to hide the URL bar when the button is clicked
+        scrollBtn.addEventListener('click', () => {
+            window.scrollTo(0, 1); // Scroll down 1px to collapse the URL bar
         });
+
+        // Ensure the video feed covers the screen without any black bars
+        function adjustVideoFit() {
+            video.style.width = '100vw';
+            video.style.height = '100vh';
+        }
+
+        // Initial adjustment of video size
+        adjustVideoFit();
+
+        // Re-adjust video size on window resize or orientation change
+        window.addEventListener('resize', adjustVideoFit);
     </script>
 </body>
 </html>
