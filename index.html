@@ -44,14 +44,14 @@
         /* Text instruction for scrolling */
         .scroll-instruction {
             position: fixed;
-            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 20;
             font-family: 'Times New Roman', serif;
-            font-size: 12pt;
-            color: #330000;
+            font-size: 1em; /* Responsive to user's default font size */
+            color: #000000; /* Pure black */
             background: none;
+            z-index: 20;
+            transition: bottom 0.3s ease; /* Smooth movement of the text */
         }
     </style>
 </head>
@@ -63,12 +63,13 @@
     <video id="cameraStream" class="video-feed" autoplay playsinline></video>
 
     <!-- Scroll instruction -->
-    <div class="scroll-instruction">
+    <div id="scrollInstruction" class="scroll-instruction">
         Scroll to enter/exit fullscreen
     </div>
 
     <script>
         const video = document.getElementById('cameraStream');
+        const scrollInstruction = document.getElementById('scrollInstruction');
 
         // Start the back-facing camera with filters
         async function startCamera() {
@@ -86,6 +87,33 @@
 
         // Start the camera feed when the page loads
         startCamera();
+
+        // Function to dynamically adjust the position of the text instruction
+        function adjustTextPosition() {
+            const viewportHeight = window.innerHeight; // Height of the visible viewport
+            const fullHeight = window.innerHeight || document.documentElement.clientHeight;
+            const diff = fullHeight - viewportHeight; // Difference due to the URL bar
+            
+            // Adjust the text to be above the browser UI (URL bar) if it's visible
+            if (diff > 0) {
+                scrollInstruction.style.bottom = diff + 20 + 'px'; // Place above the URL bar
+            } else {
+                scrollInstruction.style.bottom = '20px'; // Bottom of the screen
+            }
+        }
+
+        // Call the function to adjust the text position on load and resize
+        adjustTextPosition();
+        window.addEventListener('resize', adjustTextPosition);
+
+        // Move the text to the very bottom of the screen on scroll
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 0) {
+                scrollInstruction.style.bottom = '10px'; // Stick to the bottom when scrolled
+            } else {
+                adjustTextPosition(); // Reset to its calculated position when at the top
+            }
+        });
 
         // Adjust video to ensure it fits full screen
         function adjustVideoFit() {
